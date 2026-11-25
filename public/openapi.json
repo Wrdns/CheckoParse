@@ -1,0 +1,367 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Сведения о контрагентах",
+    "version": "1.0.0",
+    "description": "Поиск организации и индивидуального предпринимателя по ИНН через Checko. Передайте токен этого сервиса в заголовке Authorization по схеме Bearer."
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    },
+    {}
+  ],
+  "tags": [
+    {
+      "name": "Контрагенты"
+    },
+    {
+      "name": "Диагностика"
+    }
+  ],
+  "paths": {
+    "/api/v1/companies/{inn}": {
+      "get": {
+        "tags": [
+          "Контрагенты"
+        ],
+        "summary": "Получить организацию по ИНН",
+        "operationId": "getCompany",
+        "parameters": [
+          {
+            "name": "inn",
+            "in": "path",
+            "required": true,
+            "description": "Передайте ИНН с действительными контрольными цифрами.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{10}$"
+            },
+            "example": "7735560386"
+          }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Card" },
+          "400": { "$ref": "#/components/responses/InvalidInn" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "405": { "$ref": "#/components/responses/MethodNotAllowed" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/UpstreamError" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" },
+          "504": { "$ref": "#/components/responses/UpstreamTimeout" }
+        }
+      }
+    },
+    "/api/v1/entrepreneurs/{inn}": {
+      "get": {
+        "tags": [
+          "Контрагенты"
+        ],
+        "summary": "Получить индивидуального предпринимателя по ИНН",
+        "operationId": "getEntrepreneur",
+        "parameters": [
+          {
+            "name": "inn",
+            "in": "path",
+            "required": true,
+            "description": "Передайте ИНН с действительными контрольными цифрами.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{12}$"
+            },
+            "example": "402907671076"
+          }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Card" },
+          "400": { "$ref": "#/components/responses/InvalidInn" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "405": { "$ref": "#/components/responses/MethodNotAllowed" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/UpstreamError" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" },
+          "504": { "$ref": "#/components/responses/UpstreamTimeout" }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Диагностика"
+        ],
+        "summary": "Проверить, что приложение отвечает",
+        "description": "Проверка выполняется локально без запроса в Checko.",
+        "operationId": "getHealth",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Приложение работает.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": { "$ref": "#/components/responses/MethodNotAllowed" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Токен доступа к этому сервису. Ключ Checko настраивается на сервере."
+      }
+    },
+    "schemas": {
+      "Counterparty": {
+        "type": "object",
+        "required": [
+          "inn",
+          "ogrn",
+          "name",
+          "status",
+          "registered_at",
+          "address"
+        ],
+        "properties": {
+          "inn": {
+            "type": "string",
+            "minLength": 1,
+            "description": "ИНН организации или предпринимателя."
+          },
+          "ogrn": {
+            "type": "string",
+            "minLength": 1,
+            "description": "ОГРН юридического лица или ОГРЫНИП предпринимателя."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Наименование организации или ФИО предпринимателя."
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "description": "Статус регистрации по сведениям Checko."
+          },
+          "registered_at": {
+            "type": "string",
+            "nullable": true,
+            "description": "Дата регистрации."
+          },
+          "address": {
+            "type": "string",
+            "nullable": true,
+            "description": "Юридический адрес организации или доступные сведения о месте регистрации ИП."
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "invalid_inn",
+                  "unauthorized",
+                  "not_found",
+                  "method_not_allowed",
+                  "internal_error",
+                  "upstream_error",
+                  "service_unavailable",
+                  "upstream_timeout"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "description": "Описание ошибки на русском языке."
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "Card": {
+        "description": "Карточка контрагента. Если необязательные сведения отсутствуют у источника, соответствующие значения равны null.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": { "$ref": "#/components/schemas/Counterparty" }
+              }
+            }
+          }
+        }
+      },
+      "InvalidInn": {
+        "description": "Неверная длина, формат или контрольные цифры ИНН. Код ошибки — `invalid_inn`.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": {
+              "error": {
+                "code": "invalid_inn",
+                "message": "Неверная длина, формат или контрольные цифры ИНН."
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Требуется действующий Bearer-токен этого API. Код ошибки — `unauthorized`.",
+        "headers": {
+          "WWW-Authenticate": {
+            "description": "Схема авторизации.",
+            "schema": {
+              "type": "string",
+              "example": "Bearer"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": {
+              "error": {
+                "code": "unauthorized",
+                "message": "Требуется действующий Bearer-токен этого API."
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Запись с указанным ИНН не найдена. Код ошибки — `not_found`.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": {
+              "error": {
+                "code": "not_found",
+                "message": "Запись с указанным ИНН не найдена."
+              }
+            }
+          }
+        }
+      },
+      "MethodNotAllowed": {
+        "description": "Метод запроса не поддерживается. Код ошибки — `method_not_allowed`.",
+        "headers": {
+          "Allow": {
+            "description": "Поддерживаемый метод.",
+            "schema": {
+              "type": "string",
+              "example": "GET"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": {
+              "error": {
+                "code": "method_not_allowed",
+                "message": "Метод запроса не поддерживается."
+              }
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Внутренняя ошибка приложения. Код ошибки — `internal_error`.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": {
+              "error": {
+                "code": "internal_error",
+                "message": "Внутренняя ошибка приложения."
+              }
+            }
+          }
+        }
+      },
+      "UpstreamError": {
+        "description": "Не удалось получить корректные данные от Checko. Код ошибки — `upstream_error`.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": {
+              "error": {
+                "code": "upstream_error",
+                "message": "Не удалось получить корректные данные от Checko."
+              }
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "Данные временно недоступны. Проверьте доступность сервиса и лимит запросов Checko. Код ошибки — `service_unavailable`.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": {
+              "error": {
+                "code": "service_unavailable",
+                "message": "Данные временно недоступны. Проверьте доступность сервиса и лимит запросов Checko."
+              }
+            }
+          }
+        }
+      },
+      "UpstreamTimeout": {
+        "description": "Истекло время ожидания ответа Checko. Код ошибки — `upstream_timeout`.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": {
+              "error": {
+                "code": "upstream_timeout",
+                "message": "Истекло время ожидания ответа Checko."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

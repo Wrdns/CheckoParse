@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Документация API контрагентов</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.36.0/swagger-ui.css"
+          integrity="sha256-frn1oSXkvJs/C3GGm2bRo9fFAfly9T1E75HCrmxb2l4=" crossorigin="anonymous">
+</head>
+<body>
+    <nav aria-label="Документация">
+        <a href="/openapi.json">Спецификация OpenAPI в формате JSON</a>
+    </nav>
+    <main id="swagger-ui"></main>
+    <noscript>Для отправки запросов из Swagger UI включите JavaScript.</noscript>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.36.0/swagger-ui-bundle.js"
+            integrity="sha256-sWTFoiU15A2uCMACcWdKZ+Q37BlQmMVfzt+P+sesPIg=" crossorigin="anonymous"></script>
+    <script>
+        if (typeof SwaggerUIBundle === "function") {
+            SwaggerUIBundle({
+                url: "/openapi.json",
+                dom_id: "#swagger-ui",
+                deepLinking: true,
+                validatorUrl: null
+            });
+        } else {
+            document.getElementById("swagger-ui").textContent =
+                "Не удалось загрузить Swagger UI. Спецификация доступна по ссылке выше.";
+        }
+    </script>
+</body>
+</html>
